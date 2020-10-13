@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 // Connect to DB
 mongoose.connect('mongodb://localhost:27017/codeial_dev', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useCreateIndex: true,
 });
 
 // Acquire the connection to check if it's Successful
