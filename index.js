@@ -6,13 +6,20 @@ const cookieParser = require('cookie-parser');
 const db = require('./config/mongoose');
 const User = require('./models/user')
 
+// User for session cookie and authentication
+const session = require('express-session');
+const passport = require('passport');
+const passportLocal = require('./config/passport-local-strategy');
+const MongoStore = require('connect-mongo')(session);
+
 const app = express();
 const port = 8001;
 const expressLayouts = require('express-ejs-layouts');
 
-
 // Body parser
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 
 // cookie
 app.use(cookieParser());
@@ -26,15 +33,38 @@ app.use(expressLayouts);
 app.set('layout extractStyles', true);
 app.set('layout extractScripts', true);
 
-// User express router
-app.use('/', require('./routes'));
-
 // Setup the view engine
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.listen(port, function (err){
-  if(err){
+// mongo store is used to store the session cookie in the db
+app.use(session({
+  name: 'codeial',
+  // TODO change secret key before deployment in production mode
+  secret: 'blahsomething',
+  saveUninitialized: false,
+  resave: false,
+  cookie: {
+    maxAge: (1000 * 60 * 100)
+  },
+  store: new MongoStore({
+    mongooseConnection: db,
+    autoRemove: 'disabled'
+  }, function(err) {
+    console.log(err || 'connect-mongodb setup ok');
+  })
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(passport.setAuthenticatedUser);
+
+// User express router
+app.use('/', require('./routes'));
+
+app.listen(port, function(err) {
+  if (err) {
     // console.log('Error: ', err);
     console.log(`Error in running the server: ${err}`);
   }

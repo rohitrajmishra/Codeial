@@ -8,7 +8,10 @@ module.exports.profile = function(req, res) {
 }
 
 module.exports.signin = function(req, res) {
-  // return res.end('<h1> User profile</h1>')
+  if(req.isAuthenticated()){
+    return res.redirect('/users/profile');
+  }
+
   return res.render('signIn', {
     title: "Sign In"
   });
@@ -16,11 +19,13 @@ module.exports.signin = function(req, res) {
 
 // Sign-in and create-session
 module.exports.createSession = function (req, res) {
-  // TODO create-session
+  return res.redirect('/');
 }
 
 module.exports.signup = function(req, res) {
-  // return res.end('<h1> User profile</h1>')
+  if(req.isAuthenticated()){
+    return res.redirect('/users/profile');
+  }
   return res.render('signUp', {
     title: "Sign Up"
   });
