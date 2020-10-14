@@ -3,11 +3,13 @@
 
 <section id="feed-posts">
   <h4>Posts</h4>
+  <%# Show the post form only if user is signed in %>
+  <% if (locals.user) { %>
   <form id="new-post-form" action="/posts/create" method="POST">
     <textarea name="content" rows="3" cols="30" placeholder="Type here.."></textarea>
     <input type="submit" value="Post">
   </form>
-
+  <% } %>
   <div class="posts-list-container">
     <ul>
       <% for (post of posts) {%>
