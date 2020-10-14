@@ -11,10 +11,20 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocal = require('./config/passport-local-strategy');
 const MongoStore = require('connect-mongo')(session);
+const sassMiddleware = require('node-sass-middleware');
 
 const app = express();
 const port = 8001;
 const expressLayouts = require('express-ejs-layouts');
+
+// Sass middleware, precompilation from scss or sass to css files
+app.use(sassMiddleware({
+  src: './assets/scss',
+  dest: './assets/css',
+  debug: true,
+  outputStyle: 'extended',
+  prefix: '/css'
+}));
 
 // Body parser
 app.use(express.urlencoded({
