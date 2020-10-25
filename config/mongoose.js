@@ -5,6 +5,7 @@ mongoose.connect('mongodb://localhost:27017/codeial_dev', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
+  useFindAndModify: false
 });
 
 // Acquire the connection to check if it's Successful
