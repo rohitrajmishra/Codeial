@@ -21,6 +21,8 @@ module.exports.update = function(req, res) {
     return res.status(401).send('Unauthorized');
   }
 }
+
+
 module.exports.signin = function(req, res) {
   if(req.isAuthenticated()){
     return res.redirect('/users/profile');
@@ -33,6 +35,7 @@ module.exports.signin = function(req, res) {
 
 // Sign-in and create-session
 module.exports.createSession = function (req, res) {
+  req.flash('success', 'Logged in Successfully');
   return res.redirect('/');
 }
 
@@ -82,5 +85,7 @@ module.exports.create = function (req, res) {
 module.exports.destroySession = function (req, res) {
   // Logout function is given by passport js
   req.logout();
+  req.flash('success', 'You have logged out...');
+  
   return res.redirect('/');
 }
