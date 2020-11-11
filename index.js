@@ -39,6 +39,8 @@ app.use(cookieParser());
 
 // Setup for static files
 app.use(express.static('./assets'));
+// Make the uploads path available to the browser
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 // Layouts need to be put before router, router will use these layouts
 app.use(expressLayouts);
