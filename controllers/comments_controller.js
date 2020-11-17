@@ -1,6 +1,8 @@
-const Comment = require('../models/comment');
-const Post = require('../models/post');
-const commentsMailer = require('../mailers/comments_mailer');
+const Comment = require("../models/comment");
+const Post = require("../models/post");
+const commentsMailer = require("../mailers/comments_mailer");
+const queue = require('../config/kue');
+const commentEmailWorker = require("../workers/comment_email_worker");
 
 module.exports.create = async function(req, res) {
   try {
@@ -9,34 +11,43 @@ module.exports.create = async function(req, res) {
       let comment = await Comment.create({
         content: req.body.content,
         post: req.body.post,
-        user: req.user._id
+        user: req.user._id,
       });
 
       post.comments.push(comment);
       post.save();
 
-      comment = await comment.populate('user', 'name email').execPopulate();
-      // Send email
-      commentsMailer.newComment(comment);
+      comment = await comment.populate("user", "name email").execPopulate();
+      // // Send email
+      // commentsMailer.newComment(comment);
 
-      if(req.xhr){
+      // Enqueue the task
+      let job = queue.create("emails", comment).save(function(err) {
+        if (err) {
+          console.log("error in creating emails queue ", err);
+          return;
+        }
+
+        console.log("job enqueued ", job.id);
+      });
+
+      if (req.xhr) {
         return res.status(200).json({
           data: {
-            comment: comment
+            comment: comment,
           },
-          message: "Post created!"
-        })
+          message: "Post created!",
+        });
       }
 
-      req.flash('success', 'Comment published');
+      req.flash("success", "Comment published");
 
-      res.redirect('/');
+      res.redirect("/");
     }
-
   } catch (err) {
-    console.log('Error: ', err);
+    console.log("Error: ", err);
   }
-}
+};
 
 module.exports.destroy = async function(req, res) {
   try {
@@ -51,15 +62,14 @@ module.exports.destroy = async function(req, res) {
       // Remove the comment id from the relevant post
       let post = await Post.findByIdAndUpdate(postId, {
         $pull: {
-          comments: req.params.id
-        }
+          comments: req.params.id,
+        },
       });
-      return res.redirect('back');
+      return res.redirect("back");
     } else {
-      return res.redirect('back');
+      return res.redirect("back");
     }
   } catch (err) {
-    console.log('Error: ', err);
+    console.log("Error: ", err);
   }
-
-}
+};
